@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadSafe | Accident Severity Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-icon">R</span><span>Road<span class="brand-accent">Safe</span></span></a>
+    <span class="top-tag"><span class="live-dot"></span> MACHINE LEARNING PREDICTION</span>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">ROAD SAFETY INTELLIGENCE</div>
+        <h1>Road Accident<br><span>Severity Predictor</span></h1>
+        <p>Explore how driver, vehicle, road and environmental conditions relate to accident injury severity.</p>
+        <div class="hero-pills"><span>✓ ML-powered analysis</span><span>✓ Instant results</span><span>✓ Probability breakdown</span></div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="road-line"></div><div class="road-car">🚘</div>
+        <div class="art-circle circle-one"></div><div class="art-circle circle-two"></div>
+        <div class="art-label">ROAD<br>SAFETY</div>
+      </div>
+    </section>
+
+    <section class="intro-row">
+      <div><div class="section-kicker">PREDICTION WORKSPACE</div><h2>Accident details</h2><p class="subtext">Provide the available information to generate a severity estimate.</p></div>
+      <div class="step-badge"><span>01</span> INPUT DETAILS</div>
+    </section>
+
+    <form id="predictionForm" class="form-card">
+      <div class="form-section">
+        <div class="section-heading"><span class="section-icon">👤</span><div><h3>Driver & vehicle</h3><p>Information about the driver and the vehicle involved</p></div></div>
+        <div class="fields-grid">
+          <label>Driver age group<select name="Age_band_of_driver" required><option value="18-30">18–30</option><option value="31-50">31–50</option><option value="Over 51">Over 51</option><option value="Under 18">Under 18</option></select></label>
+          <label>Driving experience<select name="Driving_experience" required><option value="Below 1yr">Below 1 year</option><option value="1-2yr">1–2 years</option><option value="2-5yrs" selected>2–5 years</option><option value="5-10yr">5–10 years</option><option value="Above 10yr">Above 10 years</option></select></label>
+          <label>Type of vehicle<select name="Type_of_vehicle" required><option value="Automobile">Automobile</option><option value="Motorcycle">Motorcycle</option><option value="Lorry (Truck)">Lorry (Truck)</option><option value="Bus">Bus</option><option value="Bicycle">Bicycle</option><option value="Other">Other</option></select></label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-heading"><span class="section-icon">🛣️</span><div><h3>Road & environment</h3><p>Conditions at the time of the accident</p></div></div>
+        <div class="fields-grid">
+          <label>Road surface condition<select name="Road_surface_conditions" required><option value="Dry">Dry</option><option value="Wet or damp">Wet or damp</option><option value="Snow">Snow</option><option value="Flood over 3cm.">Flood over 3 cm</option></select></label>
+          <label>Light condition<select name="Light_conditions" required><option value="Daylight">Daylight</option><option value="Darkness - lights lit">Darkness – lights lit</option><option value="Darkness - no lighting">Darkness – no lighting</option><option value="Darkness - lights unlit">Darkness – lights unlit</option></select></label>
+          <label>Weather condition<select name="Weather_conditions" required><option value="Normal">Normal</option><option value="Raining">Raining</option><option value="Raining and windy">Raining and windy</option><option value="Cloudy">Cloudy</option><option value="Other">Other</option></select></label>
+        </div>
+      </div>
+
+      <div class="form-section last-section">
+        <div class="section-heading"><span class="section-icon">🚦</span><div><h3>Accident circumstances</h3><p>Details about the incident</p></div></div>
+        <div class="fields-grid">
+          <label>Vehicles involved<input name="Number_of_vehicles_involved" type="number" min="1" max="20" value="2" required></label>
+          <label>Number of casualties<input name="Number_of_casualties" type="number" min="1" max="50" value="1" required></label>
+          <label>Cause of accident<select name="Cause_of_accident" required><option value="No distancing">No distancing</option><option value="Changing lane to the right">Changing lane to the right</option><option value="Changing lane to the left">Changing lane to the left</option><option value="Driving under the influence of drugs">Driving under the influence of drugs</option><option value="Driving under the influence of alcohol">Driving under the influence of alcohol</option><option value="Overspeed">Overspeed</option><option value="Overturning">Overturning</option><option value="Other">Other</option></select></label>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <p>All fields are required. The model uses preset values for other training features.</p>
+        <button type="submit" id="predictBtn"><span>Predict severity</span><span class="btn-arrow">→</span></button>
+      </div>
+    </form>
+
+    <section id="resultSection" class="result-section hidden" aria-live="polite">
+      <div class="result-heading"><div><div class="section-kicker">MODEL OUTPUT</div><h2>Prediction result</h2></div><span class="result-status">ANALYSIS COMPLETE</span></div>
+      <div class="result-main">
+        <div class="result-symbol">✦</div>
+        <div><div class="result-caption">PREDICTED ACCIDENT SEVERITY</div><h3 id="predictionText">—</h3><p id="resultDescription">Based on the details provided.</p></div>
+      </div>
+      <div class="probability-card">
+        <div><h3>Class probability breakdown</h3><p class="subtext">Model-estimated probability for each severity class</p></div>
+        <div class="chart-wrap"><canvas id="probabilityChart"></canvas></div>
+        <div id="probabilityList" class="probability-list"></div>
+      </div>
+      <button class="secondary-button" id="resetBtn" type="button">← Make another prediction</button>
+    </section>
+
+    <div id="errorBox" class="error-box hidden" role="alert"></div>
+    <aside class="disclaimer"><span>ⓘ</span><p><strong>Educational use only.</strong> This prediction is not a certified risk assessment and must not be used for emergency response, legal, insurance or real-world safety decisions. Results also depend on preset values for model features not collected in this form.</p></aside>
+  </main>
+  <footer>RoadSafe · Road Accident Severity Prediction</footer>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
